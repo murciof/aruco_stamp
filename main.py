@@ -3,8 +3,10 @@ import cv2 as cv
 
 cap = cv.VideoCapture('media/aruco_test_1.mp4')
 
+
 while cap.isOpened():
     ret, frame = cap.read()
+    frame = cv.resize(frame, (1280, 720), interpolation=cv.INTER_AREA)
 
     if not ret:
         break
