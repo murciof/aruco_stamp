@@ -13,10 +13,14 @@ while cap.isOpened():
     frame = cv.resize(frame, (1280, 720), interpolation=cv.INTER_AREA)
     if not ret:
         break
-    frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-    corners, ids, rejectedImgPoints = cv.aruco.detectMarkers(frame_gray, dict, parameters=params)
-    print(ids)
-    cv.imshow('Aruco Test', frame_gray)
+    #frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+    corners, ids, rejectedImgPoints = cv.aruco.detectMarkers(frame, dict, parameters=params)
+    if corners:
+        for item_corners, item_ids in zip(corners,ids):
+            item_corners = np.array(item_corners, np.int32)
+            cv.polylines(frame, item_corners, True, (0, 0, 255), 4, cv.LINE_AA)
+            print(item_corners, item_ids)
+    cv.imshow('Aruco Test', frame)
     if cv.waitKey(1) == ord('q'):
         break
 
