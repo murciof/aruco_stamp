@@ -11,7 +11,12 @@ params = cv.aruco.DetectorParameters_create()
 
 diagonal_threshold = 100
 
+text_margin = 60
+
 stamped = False
+
+paint_frame = np.zeros([720, 1280, 3], dtype=np.uint8)
+paint_frame.fill(255)
 
 while cap.isOpened():
     ret, frame = cap.read()
@@ -24,7 +29,6 @@ while cap.isOpened():
         for item_corners, item_ids in zip(corners,ids):
             stamp = False
             item_corners = np.array(item_corners, np.int32)
-            cv.polylines(frame, item_corners, True, (0, 0, 255), 4, cv.LINE_AA)
             #print(item_corners, item_ids)
             top_left = item_corners[0][0]
             top_right = item_corners[0][1]
@@ -53,18 +57,27 @@ while cap.isOpened():
 
             rotation = math.degrees(math.atan(tangent))
 
+            cv.putText(frame, str(math.trunc(rotation)), (top_left[0], top_left[1]), cv.FONT_HERSHEY_SIMPLEX, 1, (220, 100, 100), 2, cv.LINE_AA)
+
             if (diagonal_length <= diagonal_threshold) and not stamped:
                 stamp_location_coordinates = [coordinates_x_sorted[0] + (x_delta / 2), coordinates_y_sorted[0] + (y_delta / 2)]
                 print("=========")
                 print("Stamp coordinates:", stamp_location_coordinates)
                 print("Rotation:", rotation)
                 stamped = True
+                cv.line(paint_frame, (top_left[0], top_left[1]), (top_right[0], top_right[1]), (0,0,0), 4)
+                cv.polylines(frame, item_corners, True, (0, 255, 0), 8, cv.LINE_AA)
+            elif (diagonal_length <= diagonal_threshold) and stamped:
+                cv.polylines(frame, item_corners, True, (80, 255, 255), 4, cv.LINE_AA)
             elif (diagonal_length > diagonal_threshold) and stamped:
                 stamped = False
-            
-    cv.imshow('Aruco Test', frame)
+            else:
+                cv.polylines(frame, item_corners, True, (0, 0, 255), 4, cv.LINE_AA)
     if cv.waitKey(1) == ord('q'):
         break
+
+    cv.imshow('Aruco Test', frame)
+    cv.imshow('Painting', paint_frame)
 
 
 cap.release()
